@@ -1,0 +1,23 @@
+{
+    "name": "assegaiphp/collections",
+    "description": "The assegaiphp/collections package is a powerful tool for creating and managing groups of related objects in your AssegaiPHP projects. With this library, you can easily organize and manipulate data in a variety of ways, such as arrays, lists, sets, and maps. The package offers a wide range of methods for adding, removing, and manipulating items, as well as sorting, searching, and filtering your collections. It is fully compatible with PHP 7.x and above and is designed to be lightweight and easy to use. Whether you're building a web application, a CLI tool, or a standalone script, assegaiphp/collections is the perfect choice for working with data. With its simple and intuitive interface, you can easily start working with collections in your project right away.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Assegai\\Collections\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Andrew Masiye",
+            "email": "andrew.masiye@assegaiphp.com"
+        }
+    ],
+    "require-dev": {
+        "codeception/codeception": "^5.0"
+    },
+    "require": {
+        "php": ">=8.2"
+    },
+}
