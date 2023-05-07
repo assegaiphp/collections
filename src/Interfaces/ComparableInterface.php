@@ -7,7 +7,7 @@ namespace Assegai\Collections\Interfaces;
  *
  * @template T
  */
-interface ComparableInterface
+interface ComparableInterface extends EquatableInterface
 {
   /**
    * Compares the current object with another object of the same type.
