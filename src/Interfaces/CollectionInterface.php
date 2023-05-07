@@ -16,23 +16,23 @@ use Stringable;
 interface CollectionInterface extends Countable, IteratorAggregate, JsonSerializable, Serializable, Stringable, ComparableInterface
 {
   /**
-   * Filters the collection using the given callback.
+   * Returns a filtered collection using the given callback.
    *
-   * @param callable $callback
-   * @return $this
+   * @param callable $callback The callback function.
+   * @return $this The filtered collection.
    */
   public function filter(callable $callback): static;
 
   /**
-   * Maps the collection using the given callback.
+   * Applies the given callback to each item in the collection.
    *
-   * @param callable $callback
-   * @return $this
+   * @param callable $callback The callback function.
+   * @return $this Returns a collection containing the results after applying the callback to each item.
    */
   public function map(callable $callback): static;
 
   /**
-   * Reduces the collection using the given callback.
+   * Iteratively reduces the collection to a single value using a callback function.
    *
    * @template T The type of the reduced value.
    * @param callable $callback The callback function.
