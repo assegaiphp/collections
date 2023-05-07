@@ -57,6 +57,24 @@ class AbstractCollection implements CollectionInterface
   /**
    * @inheritDoc
    */
+  public function isEmpty(): bool
+  {
+    return empty($this->items);
+  }
+
+  /**
+   * Determines whether the collection is not empty.
+   *
+   * @return bool True if the collection is not empty; otherwise, false.
+   */
+  public function isNotEmpty(): bool
+  {
+    return !$this->isEmpty();
+  }
+
+  /**
+   * @inheritDoc
+   */
   public function compareTo(mixed $other): int
   {
     return $this->toArray() <=> $other->toArray();
