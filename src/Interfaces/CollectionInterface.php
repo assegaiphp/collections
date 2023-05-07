@@ -9,7 +9,7 @@ use Serializable;
 use Stringable;
 
 /**
- * Represents a collection of items.
+ * Represents a collection of items. This interface is implemented by all collections.
  *
  * @template T
  */
