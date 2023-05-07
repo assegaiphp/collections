@@ -201,10 +201,11 @@ class AbstractCollection implements CollectionInterface
    *
    * @param string $methodName The name of the method.
    * @param string $typeName The name of the type.
+   * @param int $argIndex The index of the argument.
    * @return string The type error message.
    */
-  protected function getTypeErrorMessage(string $methodName, string $typeName): string
+  protected function getTypeErrorMessage(string $methodName, string $typeName, int $argIndex = 1): string
   {
-    return get_method_arg_type_error_message($methodName, 1, $this->type, $typeName);
+    return get_method_arg_type_error_message($methodName, $argIndex, $this->type, $typeName);
   }
 }
