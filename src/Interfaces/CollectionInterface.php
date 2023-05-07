@@ -64,4 +64,11 @@ interface CollectionInterface extends Countable, IteratorAggregate, JsonSerializ
    * @return bool True if the item is found; otherwise, false.
    */
   public function contains(mixed $other): bool;
+
+  /**
+   * Determines whether the collection is empty.
+   *
+   * @return bool True if the collection is empty; otherwise, false.
+   */
+  public function isEmpty(): bool;
 }
