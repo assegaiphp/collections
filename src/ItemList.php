@@ -55,6 +55,41 @@ class ItemList extends AbstractCollection
   }
 
   /**
+   * Uses a binary search algorithm to locate a specific element in the list.
+   *
+   * @template T The type of the item.
+   * @param T $item The item to search for.
+   * @return int The index of the item if found; otherwise, -1.
+   */
+  public function binarySearch(mixed $item): int
+  {
+    $low = 0;
+    $high = $this->count() - 1;
+
+    while ($low <= $high)
+    {
+      $mid = (int) (($low + $high) / 2);
+      $guess = $this->items[$mid];
+
+      if ($guess === $item)
+      {
+        return $mid;
+      }
+
+      if ($guess > $item)
+      {
+        $high = $mid - 1;
+      }
+      else
+      {
+        $low = $mid + 1;
+      }
+    }
+
+    return -1;
+  }
+
+  /**
    * Determines whether the list contains elements that match the conditions defined by the specified predicate.
    *
    * @param callable $predicate The predicate function to use when determining whether an item matches the conditions.
