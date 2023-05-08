@@ -46,12 +46,12 @@ class AbstractCollection implements CollectionInterface
    * @inheritDoc
    *
    * @template T
-   * @param T $other The item to check for.
+   * @param T $item The item to check for.
    * @return bool True if the collection contains the item; otherwise, false.
    */
-  public function contains(mixed $other): bool
+  public function contains(mixed $item): bool
   {
-    return in_array($other, $this->items, true);
+    return in_array($item, $this->items, true);
   }
 
   /**

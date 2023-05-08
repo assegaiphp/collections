@@ -60,10 +60,10 @@ interface CollectionInterface extends Countable, IteratorAggregate, JsonSerializ
    * Determines whether the collection contains a specific item.
    *
    * @template T
-   * @param T $other The item to locate in the collection.
+   * @param T $item The item to locate in the collection.
    * @return bool True if the item is found; otherwise, false.
    */
-  public function contains(mixed $other): bool;
+  public function contains(mixed $item): bool;
 
   /**
    * Determines whether the collection is empty.
