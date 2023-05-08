@@ -2,14 +2,14 @@
 
 use Assegai\Collections\ItemList;
 
-test('Add items to an ItemList collection with constructor', function () {
+it('can add items to the collection using the constructor', function () {
   $list = new ItemList('string', ['foo', 'bar', 'baz']);
 
   expect($list->count())->toBe(3)
     ->and($list->toArray())->toBe(['foo', 'bar', 'baz']);
 });
 
-test('Add items to an ItemList collection', function () {
+it('can add items to the collection', function () {
   $list = new ItemList('string');
   $list->add('foo');
   $list->add('bar');
@@ -19,7 +19,7 @@ test('Add items to an ItemList collection', function () {
     ->and($list->toArray())->toBe(['foo', 'bar', 'baz']);
 });
 
-test('Find items using the binarySearch method', function () {
+it('can find items in the collection using the binarySearch method', function () {
   $list = new ItemList('string', ['foo', 'bar', 'baz']);
 
   expect($list->binarySearch('bar'))->toBe(1)
@@ -27,7 +27,7 @@ test('Find items using the binarySearch method', function () {
     ->and($list->binarySearch('monkey'))->toBe(-1);
 });
 
-test('Check if an ItemList collection contains an item', function () {
+it('can check if the collection contains an item', function () {
   $list = new ItemList('string', ['foo', 'bar', 'baz']);
 
   expect($list->contains('bar'))->toBe(true)
@@ -35,7 +35,7 @@ test('Check if an ItemList collection contains an item', function () {
     ->and($list->contains('monkey'))->toBe(false);
 });
 
-test('Check if an ItemList collection containes an item using a predicate', function () {
+it('can check if an item in the collection exists using a predicate', function () {
   $list = new ItemList('string', ['foo', 'bar', 'baz']);
 
   expect($list->exists(fn($item) => $item === 'bar'))->toBe(true)
@@ -43,7 +43,7 @@ test('Check if an ItemList collection containes an item using a predicate', func
     ->and($list->exists(fn($item) => $item === 'monkey'))->toBe(false);
 });
 
-test('Clear an ItemList collection', function () {
+it('can clear the collection', function () {
   $list = new ItemList('string', ['foo', 'bar', 'baz']);
   $list->clear();
 
@@ -51,7 +51,7 @@ test('Clear an ItemList collection', function () {
     ->and($list->toArray())->toBe([]);
 });
 
-test('Find an item in an ItemList collection', function () {
+it('can find items in the collection using a predicate', function () {
   $list = new ItemList('string', ['foo', 'bar', 'baz']);
 
   expect($list->find(fn($item) => $item === 'bar'))->toBe('bar')
@@ -66,7 +66,7 @@ test('Find an item in an ItemList collection', function () {
     ->and($list->findLastIndex(fn($item) => $item === 'monkey'))->toBe(-1);
 });
 
-test('Add items to an ItemList collection with the insert method', function () {
+it('can add items to the collection with the insert method', function () {
   $list = new ItemList('string', ['foo', 'bar', 'baz']);
   $list->insert(1, 'monkey');
 
@@ -79,7 +79,7 @@ test('Add items to an ItemList collection with the insert method', function () {
     ->and($list->toArray())->toBe(['foo', 'a', 'b', 'c', 'monkey', 'bar', 'baz']);
 });
 
-test('Remove items from an ItemList collection', function () {
+it('can remove items from the collection', function () {
   $list = new ItemList('string', ['foo', 'bar', 'baz']);
   $list->remove('bar');
 
@@ -87,7 +87,7 @@ test('Remove items from an ItemList collection', function () {
     ->and($list->toArray())->toBe(['foo', 'baz']);
 });
 
-test('Get a subset of an ItemList collection', function () {
+it('can create a subset of the collection', function () {
   $list = new ItemList('string', ['foo', 'bar', 'baz']);
   $subset = $list->subList(1, 2);
 
