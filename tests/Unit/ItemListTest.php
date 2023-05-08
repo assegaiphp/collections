@@ -86,3 +86,11 @@ test('Remove items from an ItemList collection', function () {
   expect($list->count())->toBe(2)
     ->and($list->toArray())->toBe(['foo', 'baz']);
 });
+
+test('Get a subset of an ItemList collection', function () {
+  $list = new ItemList('string', ['foo', 'bar', 'baz']);
+  $subset = $list->subList(1, 2);
+
+  expect($subset->count())->toBe(2)
+    ->and($subset->toArray())->toBe(['bar', 'baz']);
+});
