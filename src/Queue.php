@@ -44,7 +44,7 @@ class Queue extends AbstractCollection implements QueueInterface
       default => gettype($other),
     };
 
-    if ($typeName !== $this->type)
+    if ($typeName !== $this->type && is_subclass_of($item, $this->type) === false)
     {
       throw new TypeError( $this->getTypeErrorMessage(__METHOD__, $typeName) );
     }

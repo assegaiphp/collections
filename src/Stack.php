@@ -11,6 +11,13 @@ use TypeError;
  */
 class Stack extends AbstractCollection
 {
+  /**
+   * Constructs a new Stack instance.
+   *
+   * @template T
+   * @param class-string<T> $type The type of the stack.
+   * @var array $items The items in the stack.
+   */
   public function __construct(
     string $type,
     array $items = []
@@ -38,7 +45,7 @@ class Stack extends AbstractCollection
       default => gettype($item),
     };
 
-    if ($typeName !== $this->type)
+    if ($typeName !== $this->type && is_subclass_of($item, $this->type) === false)
     {
       throw new TypeError($this->getTypeErrorMessage(__METHOD__, $typeName));
     }
