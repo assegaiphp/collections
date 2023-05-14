@@ -11,6 +11,13 @@ use TypeError;
  */
 class Stack extends AbstractCollection
 {
+  /**
+   * Constructs a new Stack instance.
+   *
+   * @template T The type of the stack.
+   * @param class-string<T> $type The type of the stack.
+   * @var array $items The items in the stack.
+   */
   public function __construct(
     string $type,
     array $items = []
@@ -27,7 +34,7 @@ class Stack extends AbstractCollection
   /**
    * Adds an item to the stack.
    *
-   * @template T type of item
+   * @template T The type of item
    * @param T $item The item to add.
    * @return void
    */
@@ -38,7 +45,7 @@ class Stack extends AbstractCollection
       default => gettype($item),
     };
 
-    if ($typeName !== $this->type)
+    if ($typeName !== $this->type && is_subclass_of($item, $this->type) === false)
     {
       throw new TypeError($this->getTypeErrorMessage(__METHOD__, $typeName));
     }
@@ -49,7 +56,7 @@ class Stack extends AbstractCollection
   /**
    * Adds multiple items to the stack.
    *
-   * @template T
+   * @template T The type of the items.
    * @param T ...$items The items to add.
    * @return void
    */
@@ -64,7 +71,7 @@ class Stack extends AbstractCollection
   /**
    * Removes an item from the stack.
    *
-   * @template T
+   * @template T The type of the item.
    * @return T The removed item.
    */
   public function pop(): mixed
@@ -75,7 +82,7 @@ class Stack extends AbstractCollection
   /**
    * Gets the item at the top of the stack.
    *
-   * @template T
+   * @template T The type of the item.
    * @return T The item at the top of the stack.
    */
   public function peek(): mixed
@@ -85,6 +92,7 @@ class Stack extends AbstractCollection
       return null;
     }
 
-    return $this->items[count($this->items) - 1];
+    $index = array_key_last($this->items);
+    return $this->items[$index];
   }
 }
