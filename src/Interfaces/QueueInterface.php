@@ -13,10 +13,10 @@ interface QueueInterface extends CollectionInterface
    * Adds an item to the end of the queue.
    *
    * @template T The type of the item to add.
-   * @param T $other The item to add.
+   * @param T $item The item to add.
    * @return void
    */
-  public function enqueue(mixed $other): void;
+  public function enqueue(mixed $item): void;
 
   /**
    * Removes the item at the beginning of the queue.
