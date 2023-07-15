@@ -55,6 +55,18 @@ class AbstractCollection implements CollectionInterface
   }
 
   /**
+   * Determines whether the collection does not contain an item.
+   *
+   * @template T
+   * @param T $item The item to check for.
+   * @return bool True if the collection does not contain the item; otherwise, false.
+   */
+  public function doesNotContain(mixed $item): bool
+  {
+    return !$this->contains($item);
+  }
+
+  /**
    * @inheritDoc
    */
   public function isEmpty(): bool
