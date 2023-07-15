@@ -34,14 +34,14 @@ class Queue extends AbstractCollection implements QueueInterface
    * Adds an item to the end of the queue.
    *
    * @template T The type of the item to add.
-   * @param T $other The item to add.
+   * @param T $item The item to add.
    * @return void
    */
-  public function enqueue(mixed $other): void
+  public function enqueue(mixed $item): void
   {
     $typeName = match (true) {
-      is_object($other) => get_class($other),
-      default => gettype($other),
+      is_object($item) => get_class($item),
+      default => gettype($item),
     };
 
     if ($typeName !== $this->type && is_subclass_of($item, $this->type) === false)
@@ -49,7 +49,7 @@ class Queue extends AbstractCollection implements QueueInterface
       throw new TypeError( $this->getTypeErrorMessage(__METHOD__, $typeName) );
     }
 
-    $this->items[] = $other;
+    $this->items[] = $item;
   }
 
   /**

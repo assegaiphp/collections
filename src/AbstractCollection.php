@@ -185,7 +185,7 @@ class AbstractCollection implements CollectionInterface
   }
 
   /**
-   * Magic method for unserializing the collection.
+   * Magic method for deserializing the collection.
    *
    * @template T
    * @param array<T> $data The items in the collection.
