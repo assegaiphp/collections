@@ -323,7 +323,7 @@ class ItemList extends AbstractCollection
    * @param int|null $length The number of items in the slice.
    * @return $this A new ItemList that contains the specified range of items from the original list.
    */
-  public function subList(int $start, int $length = null): static
+  public function subList(int $start, ?int $length = null): static
   {
     $length = $length ?? $this->count();
     return new static($this->type, array_slice($this->items, $start, $length));
