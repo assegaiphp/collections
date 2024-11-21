@@ -57,13 +57,19 @@ class Stack extends AbstractCollection
    * Adds multiple items to the stack.
    *
    * @template T The type of the items.
-   * @param T ...$items The items to add.
+   * @param T[] ...$items The items to add.
    * @return void
    */
   public function pushAll(mixed ...$items): void
   {
     foreach ($items as $item)
     {
+      if (is_array($item))
+      {
+        $this->pushAll(...$item);
+        continue;
+      }
+
       $this->push($item);
     }
   }

@@ -20,6 +20,14 @@ interface SetInterface extends CollectionInterface
   public function add(mixed $item): void;
 
   /**
+   * Adds all items in the specified collection to the current set.
+   *
+   * @param mixed ...$items The collection of items to add to the set.
+   * @return void
+   */
+  public function addAll(mixed ...$items): void;
+
+  /**
    * Removes an item from the set.
    *
    * @template T The type of the item.
