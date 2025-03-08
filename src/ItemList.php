@@ -15,19 +15,14 @@ class ItemList extends AbstractCollection
   /**
    * Constructs a new ItemList instance.
    *
-   * @template T The type of the items in the list.
    * @param class-string<T> $type The type of the items in the list.
    * @param array $items The items in the list.
    */
-  public function __construct(
-    string $type,
-    array $items = []
-  )
+  public function __construct(string $type, array $items = [])
   {
     parent::__construct($type);
 
-    foreach ($items as $item)
-    {
+    foreach ($items as $item) {
       $this->add($item);
     }
   }
@@ -35,7 +30,6 @@ class ItemList extends AbstractCollection
   /**
    * Adds an item to the list.
    *
-   * @template T The type of the item.
    * @param T $item The item to add.
    * @return void
    */
@@ -46,9 +40,8 @@ class ItemList extends AbstractCollection
       default => gettype($item),
     };
 
-    if ($typeName !== $this->type && is_subclass_of($item, $this->type) === false)
-    {
-      throw new TypeError( $this->getTypeErrorMessage(__METHOD__, $typeName) );
+    if ($typeName !== $this->type && is_subclass_of($item, $this->type) === false) {
+      throw new TypeError($this->getTypeErrorMessage(__METHOD__, $typeName));
     }
 
     $this->items[] = $item;
@@ -57,7 +50,6 @@ class ItemList extends AbstractCollection
   /**
    * Uses a binary search algorithm to locate a specific element in the list.
    *
-   * @template T The type of the item.
    * @param T $item The item to search for.
    * @return int The index of the item if found; otherwise, -1.
    */
@@ -66,22 +58,17 @@ class ItemList extends AbstractCollection
     $low = 0;
     $high = $this->count() - 1;
 
-    while ($low <= $high)
-    {
-      $mid = (int) (($low + $high) / 2);
+    while ($low <= $high) {
+      $mid = (int)(($low + $high) / 2);
       $guess = $this->items[$mid];
 
-      if ($guess === $item)
-      {
+      if ($guess === $item) {
         return $mid;
       }
 
-      if ($guess > $item)
-      {
+      if ($guess > $item) {
         $high = $mid - 1;
-      }
-      else
-      {
+      } else {
         $low = $mid + 1;
       }
     }
@@ -106,7 +93,6 @@ class ItemList extends AbstractCollection
    * Searches for an element that matches the conditions defined by the specified predicate, and returns the first
    * occurrence within the entire list.
    *
-   * @template T The type of the item.
    * @param callable $predicate The predicate function to use when determining whether an item matches the conditions.
    * @return ?T The first item that matches the conditions defined by the specified predicate, if found; otherwise,
    * null.
@@ -115,59 +101,9 @@ class ItemList extends AbstractCollection
   {
     $result = null;
 
-    foreach ($this as $item)
-    {
-      if ($predicate($item))
-      {
+    foreach ($this as $item) {
+      if ($predicate($item)) {
         $result = $item;
-        break;
-      }
-    }
-
-    return $result;
-  }
-
-  /**
-   * Searches for an element that matches the conditions defined by the specified predicate, and returns all occurrences
-   * within the entire list.
-   *
-   * @template T The type of the item.
-   * @param callable $predicate The predicate function to use when determining whether an item matches the conditions.
-   * @return ItemList<T> The items that match the conditions defined by the specified predicate, if found; otherwise,
-   * an empty list.
-   */
-  public function findAll(callable $predicate): static
-  {
-    $result = new ItemList($this->type);
-
-    foreach ($this as $item)
-    {
-      if ($predicate($item))
-      {
-        $result->add($item);
-      }
-    }
-
-    return $result;
-  }
-
-  /**
-   * Searches for an element that matches the conditions defined by the specified predicate, and returns the zero-based
-   * index of the first occurrence within the entire list.
-   *
-   * @param callable $predicate The predicate function to use when determining whether an item matches the conditions.
-   * @return int The zero-based index of the first occurrence of an item that matches the conditions defined by
-   * the specified predicate, if found; otherwise, -1.
-   */
-  public function findIndex(callable $predicate): int
-  {
-    $result = -1;
-
-    foreach ($this as $index => $item)
-    {
-      if ($predicate($item))
-      {
-        $result = $index;
         break;
       }
     }
@@ -179,7 +115,6 @@ class ItemList extends AbstractCollection
    * Searches for an element that matches the conditions defined by the specified predicate, and returns the last
    * occurrence within the entire list.
    *
-   * @template T The type of the item.
    * @param callable $predicate The predicate function to use when determining whether an item matches the conditions.
    * @return ?T The last item that matches the conditions defined by the specified predicate, if found; otherwise,
    * null.
@@ -188,13 +123,27 @@ class ItemList extends AbstractCollection
   {
     $result = null;
 
-    foreach ($this->reverse() as $item)
-    {
-      if ($predicate($item))
-      {
+    foreach ($this->reverse() as $item) {
+      if ($predicate($item)) {
         $result = $item;
         break;
       }
+    }
+
+    return $result;
+  }
+
+  /**
+   * Returns an ItemList with the items in the list in reverse order.
+   *
+   * @return $this
+   */
+  protected function reverse(): static
+  {
+    $result = new static($this->type);
+
+    for ($i = $this->count() - 1; $i >= 0; $i--) {
+      $result->add($this->items[$i]);
     }
 
     return $result;
@@ -211,10 +160,8 @@ class ItemList extends AbstractCollection
   {
     $result = -1;
 
-    foreach ($this->reverse() as $index => $item)
-    {
-      if ($predicate($item))
-      {
+    foreach ($this->reverse() as $index => $item) {
+      if ($predicate($item)) {
         $result = $index;
         break;
       }
@@ -224,9 +171,23 @@ class ItemList extends AbstractCollection
   }
 
   /**
+   * Inserts the elements of a collection into the list at the specified index.
+   *
+   * @param int $index The zero-based index of the item to get.
+   * @param ItemList<T> $items The items to insert.
+   * @return void
+   */
+  public function insertRange(int $index, ItemList $items): void
+  {
+    foreach ($items as $item) {
+      $this->insert($index, $item);
+      $index++;
+    }
+  }
+
+  /**
    * Inserts an item to the list at the specified index.
    *
-   * @template T The type of the item.
    * @param int $index The zero-based index of the item to get.
    * @param T $item The item at the specified index.
    * @return void
@@ -238,35 +199,54 @@ class ItemList extends AbstractCollection
       default => gettype($item),
     };
 
-    if ($typeName !== $this->type && is_subclass_of($item, $this->type) === false)
-    {
-      throw new TypeError( $this->getTypeErrorMessage(__METHOD__, $typeName) );
+    if ($typeName !== $this->type && is_subclass_of($item, $this->type) === false) {
+      throw new TypeError($this->getTypeErrorMessage(__METHOD__, $typeName));
     }
 
     array_splice($this->items, $index, 0, $item);
   }
 
   /**
-   * Inserts the elements of a collection into the list at the specified index.
+   * Removes all the elements that match the conditions defined by the specified predicate.
    *
-   * @template T The type of the item.
-   * @param int $index The zero-based index of the item to get.
-   * @param ItemList<T> $items The items to insert.
-   * @return void
+   * @param callable $predicate The predicate function to use when determining whether an item should be removed.
+   * @return int The number of items removed from the list.
    */
-  public function insertRange(int $index, ItemList $items): void
+  public function removeAll(callable $predicate): int
   {
-    foreach ($items as $item)
-    {
-      $this->insert($index, $item);
-      $index++;
+    $initialCount = $this->count();
+
+    foreach ($this->findAll($predicate) as $item) {
+      $this->remove($item);
     }
+
+    return $initialCount - $this->count();
+  }
+
+  /**
+   * Searches for an element that matches the conditions defined by the specified predicate, and returns all occurrences
+   * within the entire list.
+   *
+   * @param callable $predicate The predicate function to use when determining whether an item matches the conditions.
+   * @return ItemList<T> The items that match the conditions defined by the specified predicate, if found; otherwise,
+   * an empty list.
+   */
+  public function findAll(callable $predicate): static
+  {
+    $result = new ItemList($this->type);
+
+    foreach ($this as $item) {
+      if ($predicate($item)) {
+        $result->add($item);
+      }
+    }
+
+    return $result;
   }
 
   /**
    * Removes the first occurrence of a specific item from the list.
    *
-   * @template T The type of the item.
    * @param T $item The item to remove from the list.
    * @return bool true if the item was successfully removed from the list; otherwise, false. This method also returns
    * false if the item is not found in the original list.
@@ -277,8 +257,7 @@ class ItemList extends AbstractCollection
 
     $index = $this->findIndex(fn($i) => $i === $item);
 
-    if ($index !== -1)
-    {
+    if ($index !== -1) {
       $this->removeAt($index);
     }
 
@@ -286,22 +265,25 @@ class ItemList extends AbstractCollection
   }
 
   /**
-   * Removes all the elements that match the conditions defined by the specified predicate.
+   * Searches for an element that matches the conditions defined by the specified predicate, and returns the zero-based
+   * index of the first occurrence within the entire list.
    *
-   * @template T The type of the item.
-   * @param callable $predicate The predicate function to use when determining whether an item should be removed.
-   * @return int The number of items removed from the list.
+   * @param callable $predicate The predicate function to use when determining whether an item matches the conditions.
+   * @return int The zero-based index of the first occurrence of an item that matches the conditions defined by
+   * the specified predicate, if found; otherwise, -1.
    */
-  public function removeAll(callable $predicate): int
+  public function findIndex(callable $predicate): int
   {
-    $initialCount = $this->count();
+    $result = -1;
 
-    foreach ($this->findAll($predicate) as $item)
-    {
-      $this->remove($item);
+    foreach ($this as $index => $item) {
+      if ($predicate($item)) {
+        $result = $index;
+        break;
+      }
     }
 
-    return $initialCount - $this->count();
+    return $result;
   }
 
   /**
@@ -327,23 +309,5 @@ class ItemList extends AbstractCollection
   {
     $length = $length ?? $this->count();
     return new static($this->type, array_slice($this->items, $start, $length));
-  }
-
-  /**
-   * Returns an ItemList with the items in the list in reverse order.
-   *
-   * @template T
-   * @return $this
-   */
-  protected function reverse(): static
-  {
-    $result = new static($this->type);
-
-    for ($i = $this->count() - 1; $i >= 0; $i--)
-    {
-      $result->add($this->items[$i]);
-    }
-
-    return $result;
   }
 }
