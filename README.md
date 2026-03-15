@@ -43,6 +43,19 @@ foreach ($list as $index => $item) {
 }
 ```
 
+`ItemList` also supports array-style access for indexed reads and writes:
+
+```php
+$list = new ItemList('string', ['foo', 'bar']);
+
+echo $list[0]; // foo
+
+$list[1] = 'baz';
+$list[] = 'tail';
+
+unset($list[0]);
+```
+
 Once you have a collection, you can use the various methods provided by the class to manipulate the items in the collection. For example, you can use the `filter` method to filter the items in the collection based on a certain condition:
 
 ```PHP
