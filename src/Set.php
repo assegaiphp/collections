@@ -13,6 +13,22 @@ use Assegai\Collections\Interfaces\SetInterface;
 class Set extends AbstractCollection implements SetInterface
 {
   /**
+   * Constructs a new Set instance and normalizes the provided items.
+   *
+   * @param string $type The type of items the set accepts.
+   * @param array $items The initial items.
+   */
+  public function __construct(string $type, array $items = [])
+  {
+    parent::__construct($type);
+
+    foreach ($items as $item)
+    {
+      $this->add($item);
+    }
+  }
+
+  /**
    * @inheritDoc
    */
   public function addAll(mixed ...$items): void
@@ -35,6 +51,8 @@ class Set extends AbstractCollection implements SetInterface
    */
   public function add(mixed $item): void
   {
+    $this->assertItemType($item, __METHOD__);
+
     if ($this->doesNotContain($item)) {
       $this->items[] = $item;
     }
@@ -56,7 +74,7 @@ class Set extends AbstractCollection implements SetInterface
   public function remove(mixed $item): void
   {
     if ($this->contains($item)) {
-      $this->items = array_filter($this->items, fn($i) => $i !== $item);
+      $this->items = array_values(array_filter($this->items, fn($i) => $i !== $item));
     }
   }
 
@@ -65,33 +83,14 @@ class Set extends AbstractCollection implements SetInterface
    */
   public function intersectWith(iterable $other): void
   {
-    // If other implements CollectionInterface, then we can use the contains method.
-    if ($other instanceof CollectionInterface) {
-      foreach ($this->items as $item) {
-        if ($other->contains($item) === false) {
-          $this->remove($item);
-        }
-      }
-    } else {
-      if (is_array($other)) {
-        foreach ($this->items as $item) {
-          if (in_array($item, $other) === false) {
-            $this->remove($item);
-          }
-        }
-      } else {
-        foreach ($this->items as $index => $item) {
-          if (isset($other->$index) === false || $other->$index !== $item) {
-            $this->remove($item);
-          }
-        }
-      }
-    }
+    $otherItems = $this->normalizeIterable($other);
 
-    // Finally add missing items from other to the current set.
-    foreach ($other as $item) {
-      $this->add($item);
-    }
+    $this->items = array_values(
+      array_filter(
+        $this->items,
+        static fn($item) => in_array($item, $otherItems, true)
+      )
+    );
   }
 
   /**
@@ -99,8 +98,10 @@ class Set extends AbstractCollection implements SetInterface
    */
   public function isSubsetOf(iterable $other): bool
   {
-    foreach ($other as $item) {
-      if ($this->doesNotContain($item)) {
+    $otherItems = $this->normalizeIterable($other);
+
+    foreach ($this->items as $item) {
+      if (!in_array($item, $otherItems, true)) {
         return false;
       }
     }
@@ -137,7 +138,7 @@ class Set extends AbstractCollection implements SetInterface
    */
   public function __serialize(): array
   {
-    return $this->items;
+    return parent::__serialize();
   }
 
   /**
@@ -145,6 +146,21 @@ class Set extends AbstractCollection implements SetInterface
    */
   public function __unserialize(array $data): void
   {
-    $this->items = $data;
+    parent::__unserialize($data);
+  }
+
+  /**
+   * Converts any iterable into a plain list of values for strict set comparisons.
+   *
+   * @param iterable $other
+   * @return array
+   */
+  private function normalizeIterable(iterable $other): array
+  {
+    return match (true) {
+      $other instanceof CollectionInterface => $other->toArray(),
+      is_array($other) => array_values($other),
+      default => array_values(iterator_to_array($other, false)),
+    };
   }
 }

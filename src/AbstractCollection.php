@@ -4,7 +4,9 @@ namespace Assegai\Collections;
 
 use ArrayIterator;
 use Assegai\Collections\Interfaces\CollectionInterface;
+use TypeError;
 use Traversable;
+use UnexpectedValueException;
 
 /**
  * The base class for all collections.
@@ -89,6 +91,18 @@ class AbstractCollection implements CollectionInterface
    */
   public function compareTo(mixed $other): int
   {
+    if (!$other instanceof CollectionInterface)
+    {
+      throw new TypeError(
+        get_method_arg_type_error_message(
+          __METHOD__,
+          1,
+          CollectionInterface::class,
+          $this->resolveTypeName($other),
+        )
+      );
+    }
+
     return $this->toArray() <=> $other->toArray();
   }
 
@@ -105,7 +119,14 @@ class AbstractCollection implements CollectionInterface
    */
   public function serialize(): string
   {
-    return json_encode($this->__serialize());
+    $serialized = json_encode($this->__serialize());
+
+    if ($serialized === false)
+    {
+      throw new UnexpectedValueException('Failed to serialize collection.');
+    }
+
+    return $serialized;
   }
 
   /**
@@ -113,7 +134,14 @@ class AbstractCollection implements CollectionInterface
    */
   public function unserialize(string $data): void
   {
-    $this->__unserialize(json_decode($data, true));
+    $decoded = json_decode($data, true);
+
+    if (!is_array($decoded))
+    {
+      throw new UnexpectedValueException('Invalid serialized collection payload.');
+    }
+
+    $this->__unserialize($decoded);
   }
 
   /**
@@ -174,6 +202,11 @@ class AbstractCollection implements CollectionInterface
    */
   public function equals(mixed $other): bool
   {
+    if (!$other instanceof CollectionInterface)
+    {
+      return false;
+    }
+
     return $this->compareTo($other) === 0;
   }
 
@@ -193,7 +226,10 @@ class AbstractCollection implements CollectionInterface
    */
   public function __serialize(): array
   {
-    return $this->items;
+    return [
+      'type' => $this->type,
+      'items' => $this->items,
+    ];
   }
 
   /**
@@ -205,7 +241,25 @@ class AbstractCollection implements CollectionInterface
    */
   public function __unserialize(array $data): void
   {
-    $this->items = $data;
+    if (array_key_exists('type', $data) && array_key_exists('items', $data))
+    {
+      if (!is_string($data['type']) || !is_array($data['items']))
+      {
+        throw new UnexpectedValueException('Invalid serialized collection payload.');
+      }
+
+      $this->type = $data['type'];
+      $this->hydrateItems($data['items']);
+      return;
+    }
+
+    if (isset($this->type) && array_is_list($data))
+    {
+      $this->hydrateItems($data);
+      return;
+    }
+
+    throw new UnexpectedValueException('Invalid serialized collection payload.');
   }
 
   /**
@@ -219,5 +273,57 @@ class AbstractCollection implements CollectionInterface
   protected function getTypeErrorMessage(string $methodName, string $typeName, int $argIndex = 1): string
   {
     return get_method_arg_type_error_message($methodName, $argIndex, $this->type, $typeName);
+  }
+
+  protected function assertItemType(mixed $item, string $methodName, int $argIndex = 1): void
+  {
+    $typeName = $this->resolveTypeName($item);
+
+    if ($typeName !== $this->type && is_subclass_of($item, $this->type) === false)
+    {
+      throw new TypeError($this->getTypeErrorMessage($methodName, $typeName, $argIndex));
+    }
+  }
+
+  protected function resolveTypeName(mixed $value): string
+  {
+    return match (true) {
+      is_object($value) => get_class($value),
+      default => gettype($value),
+    };
+  }
+
+  /**
+   * Rebuilds the collection contents while preserving each concrete collection's invariants.
+   *
+   * @param array $items
+   * @return void
+   */
+  protected function hydrateItems(array $items): void
+  {
+    $this->items = [];
+
+    foreach (array_values($items) as $item)
+    {
+      if (method_exists($this, 'add'))
+      {
+        $this->add($item);
+        continue;
+      }
+
+      if (method_exists($this, 'enqueue'))
+      {
+        $this->enqueue($item);
+        continue;
+      }
+
+      if (method_exists($this, 'push'))
+      {
+        $this->push($item);
+        continue;
+      }
+
+      $this->items[] = $item;
+    }
   }
 }

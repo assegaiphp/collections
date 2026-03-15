@@ -94,3 +94,18 @@ it('can create a subset of the collection', function () {
   expect($subset->count())->toBe(2)
     ->and($subset->toArray())->toBe(['bar', 'baz']);
 });
+
+it('can be traversed with foreach', function () {
+  $list = new ItemList('string', ['foo', 'bar', 'baz']);
+  $items = [];
+
+  foreach ($list as $index => $item) {
+    $items[$index] = $item;
+  }
+
+  expect($items)->toBe([
+    0 => 'foo',
+    1 => 'bar',
+    2 => 'baz',
+  ]);
+});
