@@ -94,3 +94,49 @@ it('can create a subset of the collection', function () {
   expect($subset->count())->toBe(2)
     ->and($subset->toArray())->toBe(['bar', 'baz']);
 });
+
+it('can be traversed with foreach', function () {
+  $list = new ItemList('string', ['foo', 'bar', 'baz']);
+  $items = [];
+
+  foreach ($list as $index => $item) {
+    $items[$index] = $item;
+  }
+
+  expect($items)->toBe([
+    0 => 'foo',
+    1 => 'bar',
+    2 => 'baz',
+  ]);
+});
+
+it('supports array-style reads and writes', function () {
+  $list = new ItemList('string', ['foo', 'bar', 'baz']);
+
+  expect($list[0])->toBe('foo')
+    ->and(isset($list[1]))->toBeTrue()
+    ->and(isset($list[10]))->toBeFalse();
+
+  $list[1] = 'updated';
+  $list[] = 'tail';
+
+  expect($list->toArray())->toBe(['foo', 'updated', 'baz', 'tail']);
+});
+
+it('supports unsetting items by offset', function () {
+  $list = new ItemList('string', ['foo', 'bar', 'baz']);
+
+  unset($list[1]);
+
+  expect($list->toArray())->toBe(['foo', 'baz']);
+});
+
+it('rejects invalid array-style offsets and values', function () {
+  $list = new ItemList('string', ['foo', 'bar']);
+
+  expect(fn() => $list['name'])->toThrow(TypeError::class)
+    ->and(fn() => $list[5])->toThrow(OutOfBoundsException::class)
+    ->and(fn() => $list['name'] = 'baz')->toThrow(TypeError::class)
+    ->and(fn() => $list[5] = 'baz')->toThrow(OutOfBoundsException::class)
+    ->and(fn() => $list[] = 123)->toThrow(TypeError::class);
+});

@@ -2,8 +2,6 @@
 
 namespace Assegai\Collections;
 
-use TypeError;
-
 /**
  * Represents a collection of items.
  *
@@ -12,6 +10,22 @@ use TypeError;
 class Collection extends AbstractCollection
 {
   /**
+   * Constructs a new Collection instance and validates the provided items.
+   *
+   * @param string $type The type of items the collection accepts.
+   * @param array $items The initial items.
+   */
+  public function __construct(string $type, array $items = [])
+  {
+    parent::__construct($type);
+
+    foreach ($items as $item)
+    {
+      $this->add($item);
+    }
+  }
+
+  /**
    * Adds an item to the collection.
    * @template T
    * @param T $item The item to add.
@@ -19,15 +33,7 @@ class Collection extends AbstractCollection
    */
   public function add(mixed $item): void
   {
-    $typeName = match (true) {
-      is_object($item) => get_class($item),
-      default => gettype($item),
-    };
-
-    if ($typeName !== $this->type && is_subclass_of($item, $this->type) === false)
-    {
-      throw new TypeError( $this->getTypeErrorMessage(__METHOD__, $typeName) );
-    }
+    $this->assertItemType($item, __METHOD__);
 
     $this->items[] = $item;
   }
@@ -40,6 +46,6 @@ class Collection extends AbstractCollection
    */
   public function remove(mixed $item): void
   {
-    $this->items = array_filter($this->items, fn($i) => $i !== $item);
+    $this->items = array_values(array_filter($this->items, fn($i) => $i !== $item));
   }
 }

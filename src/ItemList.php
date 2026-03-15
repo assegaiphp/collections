@@ -2,6 +2,8 @@
 
 namespace Assegai\Collections;
 
+use ArrayAccess;
+use OutOfBoundsException;
 use TypeError;
 
 /**
@@ -9,8 +11,9 @@ use TypeError;
  * manipulate lists.
  *
  * @template T
+ * @implements ArrayAccess<int, T>
  */
-class ItemList extends AbstractCollection
+class ItemList extends AbstractCollection implements ArrayAccess
 {
   /**
    * Constructs a new ItemList instance.
@@ -35,15 +38,7 @@ class ItemList extends AbstractCollection
    */
   public function add(mixed $item): void
   {
-    $typeName = match (true) {
-      is_object($item) => get_class($item),
-      default => gettype($item),
-    };
-
-    if ($typeName !== $this->type && is_subclass_of($item, $this->type) === false) {
-      throw new TypeError($this->getTypeErrorMessage(__METHOD__, $typeName));
-    }
-
+    $this->assertItemType($item, __METHOD__);
     $this->items[] = $item;
   }
 
@@ -194,15 +189,7 @@ class ItemList extends AbstractCollection
    */
   public function insert(int $index, mixed $item): void
   {
-    $typeName = match (true) {
-      is_object($item) => get_class($item),
-      default => gettype($item),
-    };
-
-    if ($typeName !== $this->type && is_subclass_of($item, $this->type) === false) {
-      throw new TypeError($this->getTypeErrorMessage(__METHOD__, $typeName));
-    }
-
+    $this->assertItemType($item, __METHOD__);
     array_splice($this->items, $index, 0, $item);
   }
 
@@ -309,5 +296,97 @@ class ItemList extends AbstractCollection
   {
     $length = $length ?? $this->count();
     return new static($this->type, array_slice($this->items, $start, $length));
+  }
+
+  public function offsetExists(mixed $offset): bool
+  {
+    $index = $this->normalizeOffset($offset);
+
+    if ($index === null)
+    {
+      return false;
+    }
+
+    return array_key_exists($index, $this->items);
+  }
+
+  public function offsetGet(mixed $offset): mixed
+  {
+    $index = $this->normalizeOffset($offset);
+
+    if ($index === null)
+    {
+      throw new TypeError('ItemList offsets must be integers.');
+    }
+
+    if (!array_key_exists($index, $this->items))
+    {
+      throw new OutOfBoundsException(sprintf('Undefined offset %d.', $index));
+    }
+
+    return $this->items[$index];
+  }
+
+  public function offsetSet(mixed $offset, mixed $value): void
+  {
+    $this->assertItemType($value, __METHOD__, 2);
+
+    if ($offset === null)
+    {
+      $this->items[] = $value;
+      return;
+    }
+
+    $index = $this->normalizeOffset($offset);
+
+    if ($index === null)
+    {
+      throw new TypeError('ItemList offsets must be integers.');
+    }
+
+    if ($index < 0 || $index > $this->count())
+    {
+      throw new OutOfBoundsException(sprintf('Offset %d is out of bounds.', $index));
+    }
+
+    if ($index === $this->count())
+    {
+      $this->items[] = $value;
+      return;
+    }
+
+    $this->items[$index] = $value;
+  }
+
+  public function offsetUnset(mixed $offset): void
+  {
+    $index = $this->normalizeOffset($offset);
+
+    if ($index === null)
+    {
+      throw new TypeError('ItemList offsets must be integers.');
+    }
+
+    if (!array_key_exists($index, $this->items))
+    {
+      return;
+    }
+
+    $this->removeAt($index);
+  }
+
+  private function normalizeOffset(mixed $offset): ?int
+  {
+    if (is_int($offset))
+    {
+      return $offset;
+    }
+
+    if (is_string($offset) && ctype_digit($offset))
+    {
+      return (int)$offset;
+    }
+
+    return null;
   }
 }
