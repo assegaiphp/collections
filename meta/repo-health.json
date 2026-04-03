@@ -1,0 +1,15 @@
+{
+  "repository": "assegaiphp/collections",
+  "package": "assegaiphp/collections",
+  "php": ">=8.3",
+  "license": "MIT",
+  "ci": {
+    "workflow": "php.yml",
+    "label": "tests"
+  },
+  "status": {
+    "label": "active",
+    "color": "10b981",
+    "summary": "Collections package with a green local Pest test lane."
+  }
+}
