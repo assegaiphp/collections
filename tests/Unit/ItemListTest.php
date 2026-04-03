@@ -111,6 +111,21 @@ it('can be traversed with foreach', function () {
 });
 
 
+it('keeps binarySearch on the direct search path for sorted lists', function () {
+  $list = new class('integer', [1, 2, 3, 4]) extends ItemList {
+    public int $findIndexCalls = 0;
+
+    public function findIndex(callable $predicate): int
+    {
+      $this->findIndexCalls++;
+      return parent::findIndex($predicate);
+    }
+  };
+
+  expect($list->binarySearch(3))->toBe(2)
+    ->and($list->findIndexCalls)->toBe(0);
+});
+
 it('falls back to a correct index when binarySearch is used on an unsorted list', function () {
   $list = new ItemList('integer', [2, 1, 3]);
 
