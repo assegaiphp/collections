@@ -110,6 +110,32 @@ it('can be traversed with foreach', function () {
   ]);
 });
 
+
+it('falls back to a correct index when binarySearch is used on an unsorted list', function () {
+  $list = new ItemList('integer', [2, 1, 3]);
+
+  expect($list->binarySearch(1))->toBe(1)
+    ->and($list->binarySearch(3))->toBe(2)
+    ->and($list->binarySearch(9))->toBe(-1);
+});
+
+it('returns the original index for the last matching item', function () {
+  $list = new ItemList('string', ['a', 'b', 'c', 'b']);
+
+  expect($list->findLastIndex(fn($item) => $item === 'b'))->toBe(3);
+});
+
+it('preserves subclasses when findAll returns a filtered list', function () {
+  eval('namespace Assegai\Collections\Tests; class CustomItemList extends \Assegai\Collections\ItemList {}');
+
+  $class = 'Assegai\Collections\Tests\CustomItemList';
+  $list = new $class('string', ['alpha', 'beta']);
+  $filtered = $list->findAll(fn($item) => str_starts_with($item, 'a'));
+
+  expect($filtered)->toBeInstanceOf($class)
+    ->and($filtered->toArray())->toBe(['alpha']);
+});
+
 it('supports array-style reads and writes', function () {
   $list = new ItemList('string', ['foo', 'bar', 'baz']);
 
