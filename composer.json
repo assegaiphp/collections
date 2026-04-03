@@ -18,11 +18,14 @@
         }
     ],
     "require": {
-        "php": ">=8.3"
+        "php": "^8.3"
     },
     "config": {
         "allow-plugins": {
             "pestphp/pest-plugin": true
+        },
+        "platform": {
+            "php": "8.3.0"
         }
     },
     "scripts": {

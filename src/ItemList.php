@@ -50,18 +50,29 @@ class ItemList extends AbstractCollection implements ArrayAccess
    */
   public function binarySearch(mixed $item): int
   {
+    if (!$this->isSortedForBinarySearch())
+    {
+      return $this->findIndex(fn($candidate) => $candidate === $item);
+    }
+
     $low = 0;
     $high = $this->count() - 1;
 
     while ($low <= $high) {
       $mid = (int)(($low + $high) / 2);
       $guess = $this->items[$mid];
+      $comparison = $this->compareValues($guess, $item);
 
-      if ($guess === $item) {
+      if ($comparison === null)
+      {
+        return $this->findIndex(fn($candidate) => $candidate === $item);
+      }
+
+      if ($comparison === 0) {
         return $mid;
       }
 
-      if ($guess > $item) {
+      if ($comparison > 0) {
         $high = $mid - 1;
       } else {
         $low = $mid + 1;
@@ -153,16 +164,15 @@ class ItemList extends AbstractCollection implements ArrayAccess
    */
   public function findLastIndex(callable $predicate): int
   {
-    $result = -1;
-
-    foreach ($this->reverse() as $index => $item) {
-      if ($predicate($item)) {
-        $result = $index;
-        break;
+    for ($index = $this->count() - 1; $index >= 0; $index--)
+    {
+      if ($predicate($this->items[$index]))
+      {
+        return $index;
       }
     }
 
-    return $result;
+    return -1;
   }
 
   /**
@@ -220,7 +230,7 @@ class ItemList extends AbstractCollection implements ArrayAccess
    */
   public function findAll(callable $predicate): static
   {
-    $result = new ItemList($this->type);
+    $result = new static($this->type);
 
     foreach ($this as $item) {
       if ($predicate($item)) {
@@ -385,6 +395,36 @@ class ItemList extends AbstractCollection implements ArrayAccess
     if (is_string($offset) && ctype_digit($offset))
     {
       return (int)$offset;
+    }
+
+    return null;
+  }
+
+  private function isSortedForBinarySearch(): bool
+  {
+    for ($index = 1; $index < $this->count(); $index++)
+    {
+      $comparison = $this->compareValues($this->items[$index - 1], $this->items[$index]);
+
+      if ($comparison === null || $comparison > 0)
+      {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private function compareValues(mixed $left, mixed $right): ?int
+  {
+    if (get_debug_type($left) !== get_debug_type($right))
+    {
+      return null;
+    }
+
+    if (is_scalar($left) || $left === null)
+    {
+      return $left <=> $right;
     }
 
     return null;
