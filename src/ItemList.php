@@ -15,6 +15,8 @@ use TypeError;
  */
 class ItemList extends AbstractCollection implements ArrayAccess
 {
+  private bool $sortedForBinarySearch = true;
+
   /**
    * Constructs a new ItemList instance.
    *
@@ -39,6 +41,7 @@ class ItemList extends AbstractCollection implements ArrayAccess
   public function add(mixed $item): void
   {
     $this->assertItemType($item, __METHOD__);
+    $this->updateSortedStateBeforeAppend($item);
     $this->items[] = $item;
   }
 
@@ -50,7 +53,7 @@ class ItemList extends AbstractCollection implements ArrayAccess
    */
   public function binarySearch(mixed $item): int
   {
-    if (!$this->isSortedForBinarySearch())
+    if (!$this->sortedForBinarySearch)
     {
       return $this->findIndex(fn($candidate) => $candidate === $item);
     }
@@ -200,7 +203,9 @@ class ItemList extends AbstractCollection implements ArrayAccess
   public function insert(int $index, mixed $item): void
   {
     $this->assertItemType($item, __METHOD__);
-    array_splice($this->items, $index, 0, $item);
+    $normalizedIndex = $this->normalizeInsertionIndex($index);
+    $this->updateSortedStateBeforeInsert($normalizedIndex, $item);
+    array_splice($this->items, $normalizedIndex, 0, $item);
   }
 
   /**
@@ -292,6 +297,7 @@ class ItemList extends AbstractCollection implements ArrayAccess
   public function removeAt(int $index): void
   {
     array_splice($this->items, $index, 1);
+    $this->refreshSortedState();
   }
 
   /**
@@ -343,7 +349,7 @@ class ItemList extends AbstractCollection implements ArrayAccess
 
     if ($offset === null)
     {
-      $this->items[] = $value;
+      $this->add($value);
       return;
     }
 
@@ -361,11 +367,12 @@ class ItemList extends AbstractCollection implements ArrayAccess
 
     if ($index === $this->count())
     {
-      $this->items[] = $value;
+      $this->add($value);
       return;
     }
 
     $this->items[$index] = $value;
+    $this->refreshSortedState();
   }
 
   public function offsetUnset(mixed $offset): void
@@ -385,6 +392,12 @@ class ItemList extends AbstractCollection implements ArrayAccess
     $this->removeAt($index);
   }
 
+  public function clear(): void
+  {
+    parent::clear();
+    $this->sortedForBinarySearch = true;
+  }
+
   private function normalizeOffset(mixed $offset): ?int
   {
     if (is_int($offset))
@@ -400,19 +413,87 @@ class ItemList extends AbstractCollection implements ArrayAccess
     return null;
   }
 
-  private function isSortedForBinarySearch(): bool
+  private function normalizeInsertionIndex(int $index): int
   {
+    if ($index < 0)
+    {
+      return max(0, $this->count() + $index);
+    }
+
+    return min($index, $this->count());
+  }
+
+  private function updateSortedStateBeforeAppend(mixed $item): void
+  {
+    if ($this->count() === 0)
+    {
+      $this->sortedForBinarySearch = true;
+      return;
+    }
+
+    if (!$this->sortedForBinarySearch)
+    {
+      return;
+    }
+
+    $lastIndex = array_key_last($this->items);
+    $comparison = $lastIndex === null ? 0 : $this->compareValues($this->items[$lastIndex], $item);
+
+    if ($comparison === null || $comparison > 0)
+    {
+      $this->sortedForBinarySearch = false;
+    }
+  }
+
+  private function updateSortedStateBeforeInsert(int $index, mixed $item): void
+  {
+    if ($this->count() === 0)
+    {
+      $this->sortedForBinarySearch = true;
+      return;
+    }
+
+    if (!$this->sortedForBinarySearch)
+    {
+      return;
+    }
+
+    if ($index > 0)
+    {
+      $beforeComparison = $this->compareValues($this->items[$index - 1], $item);
+
+      if ($beforeComparison === null || $beforeComparison > 0)
+      {
+        $this->sortedForBinarySearch = false;
+        return;
+      }
+    }
+
+    if ($index < $this->count())
+    {
+      $afterComparison = $this->compareValues($item, $this->items[$index]);
+
+      if ($afterComparison === null || $afterComparison > 0)
+      {
+        $this->sortedForBinarySearch = false;
+      }
+    }
+  }
+
+  private function refreshSortedState(): void
+  {
+    $this->sortedForBinarySearch = true;
+
     for ($index = 1; $index < $this->count(); $index++)
     {
       $comparison = $this->compareValues($this->items[$index - 1], $this->items[$index]);
 
       if ($comparison === null || $comparison > 0)
       {
-        return false;
+        $this->sortedForBinarySearch = false;
+        return;
       }
     }
-
-    return true;
   }
 
   private function compareValues(mixed $left, mixed $right): ?int
