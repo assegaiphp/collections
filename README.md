@@ -1,5 +1,5 @@
 <div align="center" style="padding-bottom: 48px">
-    <a href="https://assegaiphp.com/" target="blank"><img src="https://assegaiphp.com/images/logos/logo-cropped.png" width="200" alt="Assegai Logo"></a>
+  <a href="https://assegaiphp.com/" target="blank"><img src="https://assegaiphp.com/images/logos/logo-cropped.png" width="200" alt="AssegaiPHP Logo"></a>
 </div>
 
 <p align="center">
@@ -10,21 +10,25 @@
   <img alt="Status active" src="https://img.shields.io/badge/status-active-10b981?style=flat-square">
 </p>
 
-<p style="text-align: center">A progressive <a href="https://php.net">PHP</a> framework for building effecient and scalable server-side applications.</p>
-
 # AssegaiPHP Collections
 
-A powerful and easy-to-use library for creating and managing collections of related objects in AssegaiPHP. This library provides a simple and intuitive interface for working with arrays of objects, making it easy to perform common operations such as filtering, mapping, and reducing.
+<p align="center">Typed collection, list, set, queue, and stack primitives for modern PHP applications.</p>
 
-## Contribution workflow
+`assegaiphp/collections` provides small in-memory collection types used across the AssegaiPHP ecosystem. Each concrete collection receives an item type and enforces it when values enter the collection.
 
-For commit and pull request conventions in this repo, see:
+The package includes:
 
-- [docs/commit-and-pr-guidelines.md](./docs/commit-and-pr-guidelines.md)
+- `Collection` for general typed collections
+- `ItemList` for indexed access, searching, insertion, and removal
+- `Set` for unique values and set operations
+- `Queue` for first-in, first-out access
+- `Stack` for last-in, first-out access
+
+## Requirements
+
+- PHP 8.4 or newer
 
 ## Installation
-
-You can install the library using composer by running the following command:
 
 ```bash
 composer require assegaiphp/collections
@@ -32,72 +36,38 @@ composer require assegaiphp/collections
 
 ## Usage
 
-To create a new collection, you can use the `Assegai\Collections\Collection` class. This class provides a simple and intuitive interface for working with arrays of objects, making it easy to perform common operations such as filtering, mapping, and reducing.
+Create a collection by declaring the accepted PHP type:
 
-Here's an example of how to create a new collection and add some items to it:
-
-```PHP
+```php
 use Assegai\Collections\Collection;
 
-$collection = new Collection();
-$collection->add(1);
-$collection->add(2);
-$collection->add(3);
+$numbers = new Collection('integer', [1, 2, 3]);
+$numbers->add(4);
+
+$even = $numbers->filter(fn(int $number): bool => $number % 2 === 0);
+$doubled = $numbers->map(fn(int $number): int => $number * 2);
+$total = $numbers->reduce(fn(int $carry, int $number): int => $carry + $number, 0);
 ```
 
-Collections are traversable, so you can iterate over them directly with `foreach`:
+Passing a value that does not match the declared type raises a `TypeError`.
+
+`ItemList` adds indexed access and search operations:
 
 ```php
 use Assegai\Collections\ItemList;
 
-$list = new ItemList('string', ['foo', 'bar', 'baz']);
+$names = new ItemList('string', ['Ada', 'Grace', 'Margaret']);
 
-foreach ($list as $index => $item) {
-    echo "{$index}: {$item}\n";
-}
+echo $names[0];
+$index = $names->findIndex(fn(string $name): bool => $name === 'Grace');
 ```
 
-`ItemList` also supports array-style access for indexed reads and writes:
+Class names can be used as the declared type for object collections.
 
-```php
-$list = new ItemList('string', ['foo', 'bar']);
+## Contributing
 
-echo $list[0]; // foo
+For contribution and pull request conventions, see [Commit and PR Guidelines](./docs/commit-and-pr-guidelines.md).
 
-$list[1] = 'baz';
-$list[] = 'tail';
+## License
 
-unset($list[0]);
-```
-
-Once you have a collection, you can use the various methods provided by the class to manipulate the items in the collection. For example, you can use the `filter` method to filter the items in the collection based on a certain condition:
-
-```PHP
-$filteredCollection = $collection->filter(function($item) {
-    return $item > 1;
-});
-```
-
-The `map` method can be used to transform the items in the collection:
-
-```PHP
-$mappedCollection = $collection->map(function($item) {
-    return $item * 2;
-});
-```
-
-You can also use the `reduce` method to reduce the collection to a single value:
-
-```PHP
-$sum = $collection->reduce(function($carry, $item) {
-    return $carry + $item;
-}, 0);
-```
-
-## API
-
-The API of the `Assegai\Collections\Collection` class is designed to be simple and intuitive. It provides the following methods:
-
-- `add(mixed $item)`: Add an item to the collection
-- `remove(mixed $item)`: Remove an item from the collection
-- `filter(callable $callback)`: Filter the items in collection based on a callback function.
+AssegaiPHP Collections is [MIT licensed](LICENSE).
