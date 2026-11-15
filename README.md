@@ -31,7 +31,7 @@ The package includes:
 ## Installation
 
 ```bash
-composer require assegaiphp/collections
+composer require 'assegaiphp/collections:~0.11.0'
 ```
 
 ## Usage
